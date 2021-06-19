@@ -4,12 +4,29 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+import requests
+import datetime
 
 from .models import *
 
 # Create your views here.
 def index(request):
     return render(request, "stock/index.html")
+
+def create(request):
+    if request.method == "POST":
+        prediction = Predictions(
+            symbol = request.POST['symbol'],
+            predictedprice = request.POST['predictedprice'],
+            timeposted = datetime.date.now,
+            predictedtime = request.POST['predictedtime'],
+        )
+        prediction.save()
+        return HttpResponseRedirect(reverse('index'))
+    currentdate = datetime.date.now
+    return render(request, "stock/create.html", {
+        'date': currentdate
+    })
 
 def login_view(request):
     if request.method == "POST":
