@@ -16,14 +16,15 @@ def index(request):
 def create(request):
     if request.method == "POST":
         prediction = Predictions(
+            owner = request.user.username,
             symbol = request.POST['symbol'],
             predictedprice = request.POST['predictedprice'],
-            timeposted = datetime.date.now,
-            predictedtime = request.POST['predictedtime'],
+            timeposted = datetime.date.today,
+            predictedtime = request.POST['predictedtime']
         )
         prediction.save()
         return HttpResponseRedirect(reverse('index'))
-    currentdate = datetime.date.now
+    currentdate = datetime.date.today
     return render(request, "stock/create.html", {
         'date': currentdate
     })
