@@ -11,7 +11,10 @@ from .models import *
 
 # Create your views here.
 def index(request):
-    return render(request, "stock/index.html")
+    predictions = Predictions.objects.all()
+    return render(request, "stock/index.html", {
+        'predictions': predictions
+    })
 
 def create(request):
     if request.method == "POST":
@@ -19,7 +22,6 @@ def create(request):
             owner = request.user.username,
             symbol = request.POST['symbol'],
             predictedprice = request.POST['predictedprice'],
-            timeposted = datetime.date.today,
             predictedtime = request.POST['predictedtime']
         )
         prediction.save()
@@ -28,6 +30,20 @@ def create(request):
     return render(request, "stock/create.html", {
         'date': currentdate
     })
+
+def closed():
+    predictions = Predictions.objects.filter(closed = False)
+    for prediction in predictions:
+        today = datetime.date.now
+        if today == prediction.predictedtime:
+            prediction.update(closed = True)
+            symbol = prediction.symbol
+            url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=ZAW10ODA2OT1H0A8' % (symbol)
+            r = requests.get(url)
+            data = r.json()
+            price = (data['Global Quote']['05. price'])
+            if symbol >= price:
+                prediction.username
 
 def login_view(request):
     if request.method == "POST":

@@ -1,4 +1,7 @@
 {% extends "stock/layout.html" %}
 {% block body %}
-<h1>hi</h1>
+{% for prediction in predictions %}
+<h1>{{ prediction.owner }}</h1>
+<h1>{{ prediction.timeposted }}</h1>
+{% endfor %}
 {% endblock %}
