@@ -14,3 +14,4 @@ class Predictions(models.Model):
     predictedtime = models.DateField()
     upvotes = models.IntegerField(default = 0)
     closed = models.BooleanField(default = False)
+    ownerid = models.IntegerField()
