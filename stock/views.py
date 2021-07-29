@@ -23,7 +23,6 @@ def create(request):
             symbol = request.POST['symbol'],
             predictedprice = request.POST['predictedprice'],
             predictedtime = request.POST['predictedtime'],
-            ownerid = request.user.userid
         )
         prediction.save()
         return HttpResponseRedirect(reverse('index'))
@@ -44,12 +43,12 @@ def closed():
             data = r.json()
             price = (data['Global Quote']['05. price'])
             if symbol >= price:
-                users = User.objects.filter(id = prediction.ownerid)
+                users = User.objects.filter(username = prediction.owner)
                 for user in users:
                     reputation = user.reputaion + 10
                     user.objects.update(reputation = reputation)
             else:
-                users = User.objects.filter(id = prediction.ownerid)
+                users = User.objects.filter(username = prediction.owner)
                 for user in users:
                     reputation = user.reputaion - 10
                     user.objects.update(reputation = reputation)
