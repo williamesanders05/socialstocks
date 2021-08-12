@@ -1,0 +1,22 @@
+def closed():
+    predictions = Predictions.objects.filter(closed = False)
+    for prediction in predictions:
+        today = datetime.date.now
+        if today == prediction.predictedtime:
+            prediction.update(closed = True)
+            symbol = prediction.symbol
+            url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=ZAW10ODA2OT1H0A8' % (symbol)
+            r = requests.get(url)
+            data = r.json()
+            price = (data['Global Quote']['05. price'])
+            if price >= prediction.predictedprice:
+                users = User.objects.filter(username = prediction.owner)
+                for user in users:
+                    reputation = user.reputaion + 10
+                    user.objects.update(reputation = reputation)
+            else:
+                users = User.objects.filter(username = prediction.owner)
+                for user in users:
+                    reputation = user.reputaion - 10
+                    user.objects.update(reputation = reputation)
+            prediction.objects.update(closed = True)
