@@ -1,7 +1,25 @@
 {% extends "stock/layout.html" %}
+{% load custom_tags %}
 {% block body %}
-{% for prediction in predictions %}
-<h1>{{ prediction.owner }}</h1>
-<h1>{{ prediction.timeposted }}</h1>
+<form action="{% url 'search' %}" method="post">
+    {% csrf_token %}
+    <input type="text" name="symbol" id="symbol" oninput="this.value = this.value.toUpperCase()">
+    <input type="submit" value="Submit">
+</form>
+{% for own in owns %}
+<section>
+    <h1>{{ own.owner }}</h1>
+    <h1>{{ own.symbol }}</h1>
+    <label for="price">price bought</label>
+    <h1 id="price">{{ own.totalprice }}</h1>
+    <label for="data">current price</label>
+    <h1 id="data">{{ own.currentprice }}</h1>
+    <label for="dif">difference</label>
+    {% if own.currentprice|subtract:own.totalprice > 0 %}
+    <h1 id="dif" class="pos">{{ own.currentprice|subtract:own.totalprice }}</h1>
+    {% else %}
+    <h1 id="dif" class="neg">{{ own.currentprice|subtract:own.totalprice }}</h1>
+    {% endif %}
+</section>
 {% endfor %}
 {% endblock %}

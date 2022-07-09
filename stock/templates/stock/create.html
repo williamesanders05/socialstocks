@@ -4,8 +4,8 @@
 <form action="{% url 'create' %}" method="post">
     {% csrf_token %}
     <input type="text" name="symbol" id="symbol" oninput="this.value = this.value.toUpperCase()">
-    <input type="number" name="predictedprice" id="predictedprice" step="any">
-    <input type="date" name="predictedtime" id="predictedtime">
+    <input type="number" name="pricebought" id="pricebought" step="any">
+    <input type="number" name="shares" id="shares">
     <input type="submit" value="Submit">
 </form>
 {% endblock %}

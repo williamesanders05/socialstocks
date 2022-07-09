@@ -4,55 +4,53 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from html2text import re
 import requests
 import datetime
+from alpha_vantage.timeseries import TimeSeries
+import pandas as pd
+import matplotlib.pyplot as plt
+from sqlalchemy import null
 
 from .models import *
 
+key = open('apikey.txt').read()
+ts = TimeSeries(key, output_format='pandas', indexing_type='integer')
+
 # Create your views here.
 def index(request):
-    predictions = Predictions.objects.all()
+    owns = Owned.objects.filter(owner = request.user.username)
+    for own in owns:
+        data, meta = ts.get_intraday(symbol = own.symbol, interval = '5min', outputsize='full')
+        datas = float(data['1. open'][0])
+        totaldatas = datas * own.shares
+        own.currentprice = totaldatas
+        own.save()
     return render(request, "stock/index.html", {
-        'predictions': predictions
+        'owns': owns,
     })
 
 def create(request):
     if request.method == "POST":
-        prediction = Predictions(
+        owned = Owned(
             owner = request.user.username,
             symbol = request.POST['symbol'],
-            predictedprice = request.POST['predictedprice'],
-            predictedtime = request.POST['predictedtime'],
+            pricebought = request.POST['pricebought'],
+            shares = request.POST['shares'],
+            totalprice = float(request.POST['pricebought']) * float(request.POST['shares'])
         )
-        prediction.save()
+        owned.save()
         return HttpResponseRedirect(reverse('index'))
-    currentdate = datetime.date.today
-    return render(request, "stock/create.html", {
-        'date': currentdate
-    })
+    return render(request, "stock/create.html")
 
-def closed():
-    predictions = Predictions.objects.filter(closed = False)
-    for prediction in predictions:
-        today = datetime.date.now
-        if today == prediction.predictedtime:
-            prediction.update(closed = True)
-            symbol = prediction.symbol
-            url = 'https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=%s&apikey=ZAW10ODA2OT1H0A8' % (symbol)
-            r = requests.get(url)
-            data = r.json()
-            price = (data['Global Quote']['05. price'])
-            if symbol >= price:
-                users = User.objects.filter(username = prediction.owner)
-                for user in users:
-                    reputation = user.reputaion + 10
-                    user.objects.update(reputation = reputation)
-            else:
-                users = User.objects.filter(username = prediction.owner)
-                for user in users:
-                    reputation = user.reputaion - 10
-                    user.objects.update(reputation = reputation)
-            prediction.objects.update(closed = True)
+def search(request):
+    if request.method == "POST":
+        data, meta = ts.get_intraday(symbol=request.POST['symbol'], interval = '5min', outputsize='full')
+        return render(request, "stock/search.html", {
+            'data': data['1. open'][0],
+            'symbol': request.POST['symbol']
+        })
+    null
 
 def login_view(request):
     if request.method == "POST":

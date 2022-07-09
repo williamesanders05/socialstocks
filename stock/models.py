@@ -6,11 +6,10 @@ import datetime
 class User(AbstractUser):
     reputation = models.IntegerField(default = 0)
 
-class Predictions(models.Model):
+class Owned(models.Model):
     owner = models.CharField(max_length = 20)
     symbol = models.CharField(max_length = 5)
-    predictedprice = models.FloatField(default = 0)
-    timeposted = models.DateField(auto_now = True)
-    predictedtime = models.DateField()
-    upvotes = models.IntegerField(default = 0)
-    closed = models.BooleanField(default = False)
+    pricebought = models.FloatField(default = 0)
+    shares= models.PositiveIntegerField(default = 0)
+    totalprice = models.FloatField(default = 0)
+    currentprice = models.FloatField(default = 0)
