@@ -9,7 +9,6 @@ import requests
 import datetime
 from alpha_vantage.timeseries import TimeSeries
 import pandas as pd
-import matplotlib.pyplot as plt
 from sqlalchemy import null
 
 from .models import *
